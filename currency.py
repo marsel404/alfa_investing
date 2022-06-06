@@ -24,12 +24,14 @@ def minmax(currency_pair, day_yesterday, day_tommorow):
     try:
         connection = sqlite3.connect('db.sqlite3')
         cursor = connection.cursor()
-
+        currency_pair_get_id = cursor.execute(
+            "SELECT * FROM api_currencypairs WHERE currency_pair == ?", (currency_pair, )).fetchone()
+        id = currency_pair_get_id[0]
         min = cursor.execute(
-            "SELECT * FROM api_" + currency_pair + " WHERE date BETWEEN ? AND ? ORDER BY min", (day_yesterday, day_tommorow)).fetchone()
+            "SELECT * FROM api_currencypair WHERE currency_pair_id == ? AND date BETWEEN ? AND ? ORDER BY min", (id, day_yesterday, day_tommorow)).fetchone()
         max = cursor.execute(
-            "SELECT * FROM api_" + currency_pair + " WHERE date BETWEEN ? AND ? ORDER BY -max", (day_yesterday, day_tommorow)).fetchone()
-        print(f'MIN = {min[1]}\nMAX = {max[2]}')
+            "SELECT * FROM api_currencypair WHERE currency_pair_id == ? AND date BETWEEN ? AND ? ORDER BY -max", (id, day_yesterday, day_tommorow)).fetchone()
+        print(f'MIN = {min[2]}\nMAX = {max[3]}')
     except:
         print(
             'Ошибка. Пожалуйста, введите команду в следующем формате: currency.py minmax (валютная пара) (дата начала) (дата окончания)\n'
@@ -47,14 +49,16 @@ def list(currency_pair, day_yesterday, day_tommorow, limit):
     try:
         connection = sqlite3.connect('db.sqlite3')
         cursor = connection.cursor()
-
-        data = cursor.execute("SELECT * FROM api_" + currency_pair +
-                              " WHERE date BETWEEN ? AND ?", (day_yesterday, day_tommorow)).fetchmany(limit)
+        currency_pair_get_id = cursor.execute(
+            "SELECT * FROM api_currencypairs WHERE currency_pair == ?", (currency_pair, )).fetchone()
+        id = currency_pair_get_id[0]
+        data = cursor.execute("SELECT * FROM api_currencypair WHERE currency_pair_id == ? AND date BETWEEN ? AND ?",
+                              (id, day_yesterday, day_tommorow)).fetchmany(limit)
         print(f'Count = {limit}')
         count = 0
         for item in data:
             count += 1
-            print(f'{count}. {item[1]} {item[2]}')
+            print(f'{count}. {item[2]} {item[3]}')
     except:
         print(
             'Ошибка. Пожалуйста, введите команду в следующем формате: currency.py list (валютная пара)'
